@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeadlines } from "@/context/DeadlineContext";
+import { NotificationPrompt } from "@/components/NotificationPrompt";
 
 const STEPS = [
   {
@@ -48,6 +49,7 @@ export default function OnboardingScreen() {
   const navigate = useNavigate();
   const { addDeadlines } = useDeadlines();
   const [step, setStep] = useState(0);
+  const [showNotif, setShowNotif] = useState(false);
 
   function next() {
     if (step < STEPS.length - 1) {
@@ -55,7 +57,7 @@ export default function OnboardingScreen() {
     } else {
       localStorage.setItem("dp_onboarded", "true");
       addDeadlines(SAMPLE_DEADLINES as any);
-      navigate("/dashboard");
+      setShowNotif(true); // show notification prompt before dashboard
     }
   }
 
@@ -155,7 +157,7 @@ export default function OnboardingScreen() {
         <p onClick={() => {
           localStorage.setItem("dp_onboarded", "true");
           addDeadlines(SAMPLE_DEADLINES as any);
-          navigate("/dashboard");
+          setShowNotif(true);
         }} style={{
           textAlign: "center", marginTop: "14px",
           fontSize: "12px", color: "#3F3F46", cursor: "pointer",
@@ -164,6 +166,7 @@ export default function OnboardingScreen() {
         </p>
       </div>
 
+      {showNotif && <NotificationPrompt onDone={() => navigate("/dashboard")} />}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap');
         @keyframes obIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -171,3 +174,8 @@ export default function OnboardingScreen() {
     </div>
   );
 }
+
+// Note: import NotificationPrompt at top of file and add this state:
+// const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+// Then in finish() set showNotifPrompt(true) before navigate
+// And render: {showNotifPrompt && <NotificationPrompt onDone={() => navigate("/dashboard")} />}

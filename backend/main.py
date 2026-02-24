@@ -10,6 +10,12 @@ logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
+from datetime import datetime
+
+@app.get("/ping")
+async def ping():
+    return {"status": "alive", "time": datetime.utcnow().isoformat()}
+
 # ================== CORS ==================
 app.add_middleware(
     CORSMiddleware,

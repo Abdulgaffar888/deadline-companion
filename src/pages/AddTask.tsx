@@ -7,11 +7,11 @@ import { analyzeText, analyzePDF } from "@/lib/api";
 
 export default function AddTask() {
   const { addDeadlines } = useDeadlines();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const { toast }        = useToast();
+  const navigate         = useNavigate();
 
-  const [text, setText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [text, setText]       = useState("");
+  const [file, setFile]       = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [detected, setDetected] = useState<any[]>([]);
 
@@ -19,7 +19,7 @@ export default function AddTask() {
     setLoading(true);
     setDetected([]);
     try {
-      const data = file ? await analyzePDF(file) : await analyzeText(text);
+      const data  = file ? await analyzePDF(file) : await analyzeText(text);
       const items = data.items || [];
       setDetected(items);
       if (items.length === 0) {
@@ -46,7 +46,7 @@ export default function AddTask() {
   return (
     <div className="min-h-screen bg-app pb-28">
 
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <div
         className="sticky top-0 z-20 px-4 pt-10 pb-4"
         style={{ background: "rgb(var(--bg))", borderBottom: "1px solid rgb(var(--border))" }}
@@ -56,20 +56,20 @@ export default function AddTask() {
             className="text-xs font-mono px-2 py-0.5 rounded"
             style={{ background: "rgb(var(--accent-2))", color: "rgb(var(--accent))" }}
           >
-            
+            GRIK AI
           </span>
         </div>
         <h1 className="text-xl font-semibold tracking-tight text-primary">
           Extract Deadlines
         </h1>
         <p className="text-xs text-secondary mt-0.5">
-          Paste text or upload a document — AI will extract all deadlines.
+          Paste text or upload a PDF — AI will find all deadlines.
         </p>
       </div>
 
       <div className="px-4 pt-5 space-y-4">
 
-        {/* ── TEXT INPUT ── */}
+        {/* TEXT INPUT */}
         <div className="card">
           <div
             className="flex items-center gap-2 px-3.5 py-2.5"
@@ -90,20 +90,23 @@ export default function AddTask() {
           />
         </div>
 
-        {/* ── DIVIDER ── */}
+        {/* DIVIDER */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px" style={{ background: "rgb(var(--border))" }} />
           <span className="text-xs font-mono font-medium text-muted">OR</span>
           <div className="flex-1 h-px" style={{ background: "rgb(var(--border))" }} />
         </div>
 
-        {/* ── FILE UPLOAD ── */}
+        {/* PDF UPLOAD — free for everyone */}
         <label className="block cursor-pointer">
           <input
             type="file"
             accept="application/pdf"
             className="hidden"
-            onChange={e => { setFile(e.target.files?.[0] ?? null); setText(""); }}
+            onChange={e => {
+              setFile(e.target.files?.[0] ?? null);
+              setText("");
+            }}
           />
           <div
             className="card transition-all active:scale-[0.99]"
@@ -115,10 +118,8 @@ export default function AddTask() {
           >
             {file ? (
               <div className="flex items-center gap-3 px-3.5 py-3">
-                <div
-                  className="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgb(var(--accent-2))" }}
-                >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgb(var(--accent-2))" }}>
                   <FileText size={16} style={{ color: "rgb(var(--accent))" }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -127,7 +128,7 @@ export default function AddTask() {
                 </div>
                 <button
                   onClick={e => { e.preventDefault(); setFile(null); }}
-                  className="h-7 w-7 rounded-md flex items-center justify-center transition-all active:scale-95"
+                  className="h-7 w-7 rounded-md flex items-center justify-center"
                   style={{ background: "rgb(var(--surface-2))" }}
                 >
                   <X size={13} className="text-secondary" />
@@ -135,10 +136,8 @@ export default function AddTask() {
               </div>
             ) : (
               <div className="flex flex-col items-center py-7 gap-2">
-                <div
-                  className="h-10 w-10 rounded-xl flex items-center justify-center mb-1"
-                  style={{ background: "rgb(var(--surface-2))" }}
-                >
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-1"
+                  style={{ background: "rgb(var(--surface-2))" }}>
                   <Upload size={18} className="text-muted" />
                 </div>
                 <p className="text-sm font-medium text-secondary">Upload PDF document</p>
@@ -148,7 +147,7 @@ export default function AddTask() {
           </div>
         </label>
 
-        {/* ── ANALYZE BUTTON ── */}
+        {/* ANALYZE BUTTON */}
         <button
           onClick={analyze}
           disabled={!canAnalyze}
@@ -162,7 +161,7 @@ export default function AddTask() {
           {loading ? (
             <>
               <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              <span>Analyzing document…</span>
+              <span>AI is reading your document…</span>
             </>
           ) : (
             <>
@@ -172,7 +171,13 @@ export default function AddTask() {
           )}
         </button>
 
-        {/* ── RESULTS ── */}
+        {loading && (
+          <p style={{ textAlign: "center", fontSize: "12px", color: "rgb(var(--text-3))", fontFamily: "'DM Mono', monospace" }}>
+            ⏳ Usually takes 20–40 seconds
+          </p>
+        )}
+
+        {/* RESULTS */}
         {detected.length > 0 && (
           <div className="card animate-slide-up">
             <div
@@ -189,7 +194,7 @@ export default function AddTask() {
 
             <div className="divide-y" style={{ borderColor: "rgb(var(--border))" }}>
               {detected.map((d, i) => (
-                <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 animate-slide-up">
+                <div key={i} className="flex items-center gap-3 px-3.5 py-2.5">
                   <div className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: "rgb(var(--accent))" }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-primary truncate">{d.title}</p>
