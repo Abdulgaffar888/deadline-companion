@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
 import { useTaskStore } from '@/stores/useTaskStore';
-import { getUpcomingReminders } from '@/services/notificationService';
+import { getUpcomingReminders, sendTestNotification, rescheduleAllReminders } from '@/services/notificationService';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Bell, BellOff, Clock, ChevronRight } from 'lucide-react';
+import { Bell, BellOff, Clock, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function SettingsPage() {
@@ -13,6 +14,11 @@ export default function SettingsPage() {
     toggleNotifications,
     toggleReminderInterval,
   } = useTaskStore();
+
+  // Reschedule on app load / page mount (restores timers after refresh)
+  useEffect(() => {
+    rescheduleAllReminders(tasks, reminderIntervals, notificationsEnabled);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const upcomingReminders = notificationsEnabled
     ? getUpcomingReminders(tasks, reminderIntervals).slice(0, 10)
@@ -31,7 +37,7 @@ export default function SettingsPage() {
             className="text-xs font-mono px-2 py-0.5 rounded"
             style={{ background: "rgb(var(--accent-2))", color: "rgb(var(--accent))" }}
           >
-           GRIK AI
+            GRIK AI
           </span>
         </div>
         <h1 className="text-xl font-semibold tracking-tight text-primary">Settings</h1>
@@ -97,7 +103,31 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Upcoming reminders */}
+        {/* Test notification button */}
+        {notificationsEnabled && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-2 px-0.5">
+              Test
+            </p>
+            <button
+              onClick={sendTestNotification}
+              className="card w-full px-3.5 py-3 flex items-center gap-3 text-left active:opacity-70 transition-opacity"
+            >
+              <div
+                className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgb(var(--accent-2))" }}
+              >
+                <Zap size={15} style={{ color: "rgb(var(--accent))" }} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-primary">Send Test Notification</p>
+                <p className="text-xs text-muted">Verify notifications are working</p>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Upcoming reminders list */}
         {notificationsEnabled && upcomingReminders.length > 0 && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-2 px-0.5 flex items-center gap-1.5">
@@ -124,10 +154,7 @@ export default function SettingsPage() {
         )}
 
         {/* App info */}
-        <div
-          className="card px-3.5 py-3"
-          style={{ marginTop: "24px" }}
-        >
+        <div className="card px-3.5 py-3" style={{ marginTop: "24px" }}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-primary">GRIK AI</p>
