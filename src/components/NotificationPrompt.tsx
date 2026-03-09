@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { Bell, X } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { registerPushNotifications } from "@/hooks/usePushNotifications";
 
 interface Props {
@@ -11,12 +12,17 @@ interface Props {
 }
 
 export function NotificationPrompt({ onDone }: Props) {
+  const { user } = useAuth0();
   const [loading, setLoading] = useState(false);
   const [granted, setGranted] = useState(false);
 
   async function handleEnable() {
+    if (!user?.sub) {
+      console.warn("[GRIK AI] No Auth0 user ID available");
+      return;
+    }
     setLoading(true);
-    const sub = await registerPushNotifications();
+    const sub = await registerPushNotifications(user.sub);
     setLoading(false);
     if (sub) {
       setGranted(true);
@@ -91,7 +97,7 @@ export function NotificationPrompt({ onDone }: Props) {
           Get notified 7 days, 3 days, and 1 day before every deadline — even when the app is closed.
         </p>
 
-        {/* Preview of what a notification looks like */}
+        {/* Preview */}
         <div style={{
           background: "#0F0F12", border: "1px solid #27272A",
           borderRadius: "12px", padding: "12px 14px", marginBottom: "20px",
